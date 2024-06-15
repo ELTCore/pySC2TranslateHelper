@@ -46,8 +46,13 @@ class FrmMain(QWidget, Ui_FrmMain):
         filename = sanitize_filename(filename, "_")
 
         if os.path.exists(f'./{filename}'):
-            reply = QMessageBox.warning(self, '提示', f'{filename}已存在与文件目录侠，是否覆盖？', QMessageBox.Yes | QMessageBox.Cancel)
+            reply = QMessageBox.warning(self, '提示', f'{filename}已存在于文件目录下，是否覆盖？', QMessageBox.Yes | QMessageBox.Cancel)
             if reply != QMessageBox.Yes:
+                return
+            try:
+                os.remove(f'./{filename}')
+            except Exception as e:
+                QMessageBox.warning(self, '错误', f'覆盖文件出错:{e}')
                 return
 
         self.init()
