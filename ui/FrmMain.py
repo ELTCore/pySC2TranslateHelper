@@ -136,7 +136,9 @@ class Ui_FrmMain(object):
 "原文有改动的词条后会被添加 // originEntryHasBeenModified\n"
 "\n"
 "--注意事项--\n"
-"这是一个不稳定的测试版\n"
+"开源地址：\n"
+"https://github.com/ELTCore/pySC2Translator\n"
+"目前这是一个不稳定的测试版\n"
 "\n"
 "--作者--\n"
 "Elliott"))

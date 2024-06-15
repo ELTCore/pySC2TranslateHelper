@@ -217,7 +217,9 @@
 原文有改动的词条后会被添加 // originEntryHasBeenModified
 
 --注意事项--
-这是一个不稳定的测试版
+开源地址：
+https://github.com/ELTCore/pySC2Translator
+目前这是一个不稳定的测试版
 
 --作者--
 Elliott</string>
