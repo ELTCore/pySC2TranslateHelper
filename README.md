@@ -1,4 +1,4 @@
-# pySC2Translator
+# pySC2TranslateHelper
  一个随手写的星际2翻译文件合并工具
 
 ## 2025.08.05 更新
