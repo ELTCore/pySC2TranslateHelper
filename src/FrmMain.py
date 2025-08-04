@@ -1,16 +1,20 @@
 import os
 import sys
+import re
 from typing import List
 from pathvalidate import sanitize_filename
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox, QFileDialog
+from datetime import datetime
 
 from ui.FrmMain import Ui_FrmMain
 
 
-class FrmMain(QWidget, Ui_FrmMain):
+kStrNewEntry: str = "newEntry"
+kStrModified: str = "originEntryHasBeenModified"
 
+class FrmMain(QWidget, Ui_FrmMain):
     def __init__(self, *args, **kwargs):
         super(FrmMain, self).__init__()
         self.setupUi(self)
@@ -85,23 +89,23 @@ class FrmMain(QWidget, Ui_FrmMain):
 
     def check_entry_without_old_origin(self):
         for key, value in self.dict_new_origin.items():
-            try:
+            try:  # 在oldOrigin中查找词条
                 trans = self.dict_old_trans[key]
-            except KeyError:
-                trans = f'{value} //newEntry:{key}'
+            except KeyError:  # 在oldOrigin中找不到, 标记为新词条
+                trans = self.ignore_old_jobs(key, value, kStrNewEntry)
             finally:
                 self.dict_new_origin[key] = trans
 
     def check_entry_with_old_origin(self):
         for key, value in self.dict_new_origin.items():
             try:
-                origin_value = self.dict_old_origin[key]
+                origin_value = self.dict_old_origin[key]  # 在oldOrigin中查找词条
                 if origin_value == value:
                     trans = self.dict_old_trans[key]
-                else:
-                    trans = f'{self.dict_old_trans[key]} // originEntryHasBeenModified:{key}'
-            except KeyError:
-                trans = f'{value} // newEntry:{key}'
+                else:  # oldOrigin和newOrigin词条中的内容不一致, 标记为原文已修改
+                    trans = self.ignore_old_jobs(key, self.dict_old_trans[key], kStrModified)
+            except KeyError:  # 在oldOrigin中找不到, 标记为新词条
+                trans = self.ignore_old_jobs(key, value, kStrNewEntry)
             finally:
                 self.dict_new_origin[key] = trans
 
@@ -132,6 +136,38 @@ class FrmMain(QWidget, Ui_FrmMain):
     @QtCore.pyqtSlot()
     def on_btnExit_clicked(self):
         self.close()
+
+    def ignore_old_jobs(self, key_text: str, trans_text: str, symbol_text: str):
+        if key_text == 'Abil/Name/MorphZerglingToSwarmling222324':
+            Test: int = 0
+
+        try:
+            trans = self.dict_old_trans[key_text]
+            if self.check_symbol_and_datatime(trans, symbol_text):
+                pass
+            else:
+                current_datetime = datetime.now()
+                str_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                trans = f'{trans_text} // {symbol_text}_{str_datetime} :{key_text}'
+        except KeyError:  # 在 oldTrans中找不到, 标记为新词条
+            current_datetime = datetime.now()
+            str_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            trans = f'{trans_text} // {kStrNewEntry}_{str_datetime} :{key_text}'
+        finally:
+            return trans
+
+    def check_symbol_and_datatime(self, trans_text: str, symbol_text:str):
+        # pattern = f"// {symbol_text}_" + r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})"
+        patternNewEntry = r"// newEntry_(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})" #Todo 修改为配置上文项目
+        matchNewEntry = re.search(patternNewEntry, trans_text)
+
+        patternModified = r"// originEntryHasBeenModified_(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})"
+        matchModified = re.search(patternModified, trans_text);
+
+        if  matchNewEntry or matchModified:
+            return True
+        else:
+            return False
 
 
 if __name__ == '__main__':
